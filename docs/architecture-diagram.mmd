@@ -11,7 +11,8 @@ flowchart LR
 
     %% Spring Boot backend
     api["Spring Boot API<br/>— Business rules and activity data"]
-    appAuth["App authentication service<br/>— Sessions and access control"]
+        timerService["Timer session service<br/>— Validates timer state and records duration"]
+        appAuth["App authentication service<br/>— Sessions and access control"]
     oauthService["Google OAuth service<br/>— Connects and revokes Google accounts"]
     calendarSync["Calendar sync service<br/>— Publishes completed sessions"]
     sheetsSync["Sheets sync service<br/>— Imports, exports, and resolves conflicts"]
@@ -35,6 +36,8 @@ flowchart LR
     flutterSync -->|HTTPS REST API| api
 
     %% Backend persistence and authentication
+    api --> timerService
+    timerService --> database
     api --> appAuth
     appAuth --> database
     api -->|stores app data| database
@@ -65,5 +68,5 @@ flowchart LR
 
     class angular,angularSync,flutter,flutterSync frontend;
     class angularStore,flutterStore,outbox,database storage;
-    class api,appAuth,oauthService,calendarSync,sheetsSync,observability,notifications backend;
+    class api,timerService,appAuth,oauthService,calendarSync,sheetsSync,observability,notifications backend;
     class calendar,sheets,googleAuth external;
