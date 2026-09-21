@@ -1,0 +1,69 @@
+flowchart LR
+    %% Angular frontend
+    angular["Angular PWA<br/>— Timer, history, and review"]
+    angularSync["Angular sync service<br/>— API calls and offline work"]
+    angularStore[("Browser local storage<br/>— Offline queue and cache")]
+
+    %% Flutter frontend
+    flutter["Flutter app<br/>— Phone-first use"]
+    flutterSync["Flutter repository / sync service<br/>— API calls and offline work"]
+    flutterStore[("Mobile local storage<br/>— Offline queue and cache")]
+
+    %% Spring Boot backend
+    api["Spring Boot API<br/>— Business rules and activity data"]
+    appAuth["App authentication service<br/>— Sessions and access control"]
+    oauthService["Google OAuth service<br/>— Connects and revokes Google accounts"]
+    calendarSync["Calendar sync service<br/>— Publishes completed sessions"]
+    sheetsSync["Sheets sync service<br/>— Imports, exports, and resolves conflicts"]
+    outbox[("Sync outbox<br/>— Durable jobs and retry state")]
+    database[("PostgreSQL<br/>— App data and encrypted<br/>— Google refresh tokens")]
+    observability["Observability service<br/>— Logs, metrics, and failed-sync alerts"]
+    notifications["Push notification service<br/>— Optional reminders"]
+
+    %% External systems
+    calendar[Google Calendar]
+    sheets[Google Sheets]
+    googleAuth["Google OAuth<br/>— Server-side Google account access"]
+
+    %% Client flow
+    angular --> angularSync
+    angularSync <--> angularStore
+    angularSync -->|HTTPS REST API| api
+
+    flutter --> flutterSync
+    flutterSync <--> flutterStore
+    flutterSync -->|HTTPS REST API| api
+
+    %% Backend persistence and authentication
+    api --> appAuth
+    appAuth --> database
+    api -->|stores app data| database
+    api --> oauthService
+    oauthService <--> googleAuth
+
+    %% Durable sync flow
+    api -->|creates sync jobs| outbox
+    outbox -->|persists jobs| database
+    calendarSync <-->|claims and retries Calendar jobs| outbox
+    sheetsSync <-->|claims and retries Sheets jobs| outbox
+    calendarSync <--> calendar
+    sheetsSync <--> sheets
+
+    %% Operational and reminder flow
+    api --> observability
+    calendarSync --> observability
+    sheetsSync --> observability
+    api -->|schedules reminders| notifications
+    notifications --> angular
+    notifications --> flutter
+
+    %% Color coding by architectural role
+    classDef frontend fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#172554;
+    classDef storage fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f;
+    classDef backend fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d;
+    classDef external fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87;
+
+    class angular,angularSync,flutter,flutterSync frontend;
+    class angularStore,flutterStore,outbox,database storage;
+    class api,appAuth,oauthService,calendarSync,sheetsSync,observability,notifications backend;
+    class calendar,sheets,googleAuth external;
