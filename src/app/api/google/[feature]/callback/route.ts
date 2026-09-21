@@ -1,0 +1,3 @@
+import { consumeGoogleAuthorization } from "@/server/auth/google";
+import { NextRequest, NextResponse } from "next/server";
+export async function GET(request: NextRequest) { try { const state = request.nextUrl.searchParams.get("state"); const verifier = request.cookies.get("google_pkce")?.value; if (!state || !verifier) return NextResponse.json({ error: "INVALID_OAUTH_STATE" }, { status: 400 }); consumeGoogleAuthorization(state, verifier); return NextResponse.json({ connected: false, message: "Token exchange is deferred until an integration is enabled" }, { status: 501 }); } catch { return NextResponse.json({ error: "INVALID_OAUTH_STATE" }, { status: 400 }); } }

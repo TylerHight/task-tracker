@@ -1,0 +1,2 @@
+import { acknowledgeCapture, pendingCaptures } from "./offline-outbox";
+export async function retryPendingCaptures() { for (const item of await pendingCaptures()) { const response = await fetch("/api/offline-capture", { method: "POST", headers: { "content-type": "application/json", "idempotency-key": item.id }, body: JSON.stringify(item.payload) }); if (response.ok) await acknowledgeCapture(item.id); } }
