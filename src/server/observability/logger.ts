@@ -1,1 +1,0 @@
-export const logger = { info: (event: string, context: Record<string, unknown> = {}) => console.info(JSON.stringify({ event, ...context })), error: (event: string, context: Record<string, unknown> = {}) => console.error(JSON.stringify({ event, ...context })) };
